@@ -1,0 +1,2 @@
+
+const cluar = { page: {}, custom: {} }

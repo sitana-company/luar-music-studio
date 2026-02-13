@@ -1,0 +1,21 @@
+2025-10-02 11:40:06.055794Z jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "pages" not found; SQL statement:
+truncate table pages; [42102-232]
+2025-10-02 11:40:49.919342Z jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "page_list" not found; SQL statement:
+truncate table page_list; [42102-232]
+2025-11-20 15:10:53.263859Z jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "content" not found; SQL statement:
+TRUNCATE TABLE content-page; [42102-240]
+2025-11-27 15:04:44.035032Z jdbc[36]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "truncate [*]dictionary_entry;"; expected "TABLE"; SQL statement:
+truncate dictionary_entry; [42001-240]
+2025-11-27 16:35:40.743221Z jdbc[5]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "actions" not found; SQL statement:
+truncate table actions; [42102-240]
+2026-02-13 19:09:21.576879Z jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Data conversion error converting "luar-music-studio"; SQL statement:
+select * from netuno_app where uid = 'luar-music-studio' [22018-240]
+2026-02-13 19:11:09.980598Z jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Data conversion error converting "luar-music-studio"; SQL statement:
+select * from netuno_app where uid = 'luar-music-studio' [22018-240]

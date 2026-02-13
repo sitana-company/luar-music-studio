@@ -1,0 +1,33 @@
+@import "../../styles/variables.less";
+
+.listing {
+    margin: auto;
+    max-width: 80%;
+    padding: 1em 10.5em 0;
+    display: flex;
+
+    @media only screen and (max-width: 800px) {
+        padding: 20px 0;
+        margin: 20px auto;
+        flex-wrap: wrap;
+    }
+
+
+    h1 {
+        font-size: 2em;
+        font-weight: normal;
+        letter-spacing: .01em;
+        padding: 1em 0;
+    }
+
+    >div>div {
+        font-size: 1.2em;
+    }
+
+    >div>ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+
+}

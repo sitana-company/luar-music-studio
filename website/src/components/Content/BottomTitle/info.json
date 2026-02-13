@@ -1,0 +1,10 @@
+{
+  "en": {
+    "label": "Bottom Title",
+    "description": "Add the text with the title at the bottom."
+  },
+  "pt": {
+    "label": "Título Inferior",
+    "description": "Adiciona o texto com o título na parte inferior."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "en": {
+    "label": "Image on the left occupying half the screen.",
+    "description": "Adds an image to the left of the text, occupying half the screen."
+  },
+  "pt": {
+    "label": "Imagem à esquerda ocupando metade da tela",
+    "description": "Adiciona uma imagem à esquerda do texto ocupando metade da tela."
+  }
+}
