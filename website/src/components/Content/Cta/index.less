@@ -1,0 +1,82 @@
+@import "../../../styles/variables.less";
+
+.content-cta {
+    width: 100%;
+    background: @teal;
+    padding: 56px 60px;
+    box-sizing: border-box;
+
+    @media only screen and (max-width: @header-mobile-width) {
+        padding: 40px 24px;
+    }
+
+    &__wrapper {
+        max-width: @site-max-width;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 32px;
+
+        @media only screen and (max-width: @header-mobile-width) {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    &__text {
+        .content-cta__label {
+            margin-bottom: 8px;
+            letter-spacing: 0.12em;
+        }
+
+        >h1 {
+            margin: 0;
+        }
+    }
+
+    &__actions {
+        flex-shrink: 0;
+
+        .actions {
+            display: flex;
+            padding-left: 0;
+            margin: 0;
+
+            li {
+                min-width: 0;
+            }
+        }
+
+        .actions__item {
+            border-radius: 2px;
+            width: auto;
+            margin: 0;
+
+            h4 {
+                font-size: 0.85em;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                margin-bottom: 0;
+            }
+
+            p {
+                display: none;
+            }
+        }
+
+        .actions__item--contacto,
+        .actions__item--cursos {
+            background-color: @saffron;
+            border-color: @saffron;
+
+            h4 {
+                color: #2a1a14;
+            }
+
+            &:hover {
+                background-color: darken(@saffron, 8%);
+            }
+        }
+    }
+}

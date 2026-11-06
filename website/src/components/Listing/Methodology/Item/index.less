@@ -1,0 +1,40 @@
+@import "../../../../styles/variables.less";
+
+.listing__Methodology {
+    .listing__items {
+        counter-reset: listing-item;
+    }
+
+    .listing__item {
+        counter-increment: listing-item;
+        display: flex;
+        flex-direction: column;
+
+        .listing__item__bar {
+            order: 1;
+            display: block;
+            height: 8px;
+            width: 100%;
+            margin-bottom: 24px;
+            background: @orange;
+        }
+
+        &::before {
+            order: 2;
+            content: counter(listing-item, decimal-leading-zero);
+            display: block;
+            font-size: 52px;
+            font-family: @serif;
+            line-height: 1;
+            margin-bottom: 8px;
+            color: @orange;
+        }
+
+        h4 { order: 3; margin-bottom: 8px; }
+        > div { order: 4; }
+
+        &:nth-child(3n + 1) { .listing__item__bar { background: @orange; } &::before { color: @orange; } }
+        &:nth-child(3n + 2) { .listing__item__bar { background: @saffron; } &::before { color: @saffron; } }
+        &:nth-child(3n + 3) { .listing__item__bar { background: @teal; } &::before { color: @teal; } }
+    }
+}

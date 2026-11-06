@@ -1,0 +1,54 @@
+import { _db, _val, _req } from "@netuno/server-types";
+import cluar from "#core/cluar/main.js";
+
+cluar.permission.requireUserAuthorizedInRootOrganization();
+
+const value = _req.getString("value");
+const languageCode = _req.getString("language_code");
+const entryCode = _req.getString("entry_code");
+
+const dbLanguage = _db.queryFirst(`
+    SELECT id, code, description FROM language WHERE code = ?
+`, languageCode);
+
+if (!dbLanguage) {
+  cluar.response.error({
+    status: 404,
+    error: `language not found with code: ${languageCode}`,
+    error_code: "language-not-found"
+  });
+}
+
+const dbEntry = _db.queryFirst(`
+    SELECT id, code, description FROM translation_entry WHERE code = ?
+`, entryCode);
+
+if (!dbEntry) {
+  cluar.response.error({
+    status: 404,
+    error: `entry not found with code: ${entryCode}`,
+    error_code: "entry-not-found"
+  });
+}
+
+const data = _val.map()
+  .set("value", value)
+  .set("language_id", dbLanguage.getInt("id"))
+  .set("entry_id", dbEntry.getInt("id"));
+
+const dbTranslation = cluar.db.insertAndReturn("translation", data);
+
+cluar.response.successWithData({
+  status: 201,
+  data: _val.map()
+    .set("uid", dbTranslation.getString("uid"))
+    .set("value", dbTranslation.getString("value"))
+    .set("language", _val.map()
+      .set("code", dbLanguage.getString("code"))
+      .set("description", dbLanguage.getString("description"))
+    )
+    .set("entry", _val.map()
+      .set("code", dbEntry.getString("code"))
+      .set("description", dbEntry.getString("description"))
+    )
+});

@@ -1,0 +1,48 @@
+@import "../../../styles/variables.less";
+
+.listing__Pricing {
+    width: 100%;
+    background-color: @saffron;
+    box-sizing: border-box;
+
+    padding-top: 96px;
+    padding-bottom: 96px;
+    padding-left: 0;
+    padding-right: 0;
+
+    @media (max-width: @header-desktop-width) {
+        padding-left: 60px;
+        padding-right: 60px;
+    }
+
+    @media only screen and (max-width: @header-mobile-width) {
+        padding-top: 60px;
+        padding-bottom: 60px;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    .listing__wrapper {
+        max-width: @site-max-width;
+        margin: 0 auto;
+
+        .listing__badge {
+            margin-bottom: 12px;
+            color: @ink;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        >h1 {
+            max-width: 640px;
+            margin-bottom: 16px;
+        }
+
+        .listing__intro {
+            max-width: 640px;
+            margin-bottom: 48px;
+        }
+    }
+}

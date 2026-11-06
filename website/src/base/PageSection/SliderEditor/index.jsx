@@ -7,25 +7,26 @@ import Cluar from "../../../common/Cluar"
 
 import SortableSliderItem from "./SortableSliderItem";
 import ImageSectionEditor from "../ImageSectionEditor";
+import MetadataEditor from "../../../base/MetadataEditor";
 
 const SliderEditor = ({ sectionData, form }) => {
   const [itemsOrder, setItemsOrder] = useState([]);
   const [itemsByUid, setItemsByUid] = useState({});
 
   const handleChangeItem = (uid, property, value) => {
-    const updatedItem = {
-      ...itemsByUid[uid],
-      [property]: value,
-    };
-
-    const newItemsByUid = {
-      ...itemsByUid,
-      [uid]: updatedItem,
-    };
-
-    setItemsByUid(newItemsByUid);
-    form.setFieldsValue({
-      itemsByUid: newItemsByUid,
+    setItemsByUid(prev => {
+      const updatedItem = {
+        ...prev[uid],
+        [property]: value,
+      };
+      const newItemsByUid = {
+        ...prev,
+        [uid]: updatedItem,
+      };
+      form.setFieldsValue({
+        itemsByUid: newItemsByUid,
+      });
+      return newItemsByUid;
     });
   };
 
@@ -37,6 +38,8 @@ const SliderEditor = ({ sectionData, form }) => {
       section: "slider_item",
       title: "",
       content: "",
+      html_content: "",
+      edit_mode: "visual",
       link: "",
     };
 
@@ -96,35 +99,41 @@ const SliderEditor = ({ sectionData, form }) => {
 
   const [showActions, setShowActions] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
+  const [showMetadata, setShowMetadata] = useState(false);
 
-  const actionsData = Cluar.actions() || [];
+  const currentLangCode = Cluar.currentLanguage()?.code;
+  const allActions = Cluar.actions() || [];
+  const actionsData = allActions.filter(
+    (action) => action.language_code === currentLangCode
+  );
 
   useEffect(() => {
     _service({
-      url: "/components/slider/list",
+      url: "/reserved-area/component/slider/list",
       method: "POST",
       data: {
         language: Cluar.currentLanguage().locale
       },
       success: (res) => {
-        setTypeOptions(res.json.types);
-        setConfig(res.json.config);
+        setTypeOptions(res.json.data.types);
+        setConfig(res.json.data.config);
 
         const initialType = form.getFieldValue("type");
         setSelectedType(initialType);
 
-        const typeConfig = res.json.config.find(c => c.name === initialType);
+        const typeConfig = res.json.data.config.find(c => c.name === initialType);
         setShowActions(typeConfig?.action || false);
+        setShowMetadata(typeConfig?.metadata || false);
       },
       fail: (error) => {
-        console.log(error);
+        console.error(error);
       },
     });
   }, []);
 
   return (
     <div className="slider-editor">
-      <Form.Item label="Tipo" name="type">
+      <Form.Item label={Cluar.plainTranslation("slider-editor-field-type")} name="type">
         <Select
           options={typeOptions.map((item) => ({
             label: item.info.label,
@@ -135,9 +144,16 @@ const SliderEditor = ({ sectionData, form }) => {
 
             const typeConfig = config.find(c => c.name === value);
             setShowActions(typeConfig?.action || false);
+            setShowMetadata(typeConfig?.metadata || false);
           }}
         />
       </Form.Item>
+
+      {showMetadata && (
+        <Form.Item label="Metadata" name="metadata">
+          <MetadataEditor />
+        </Form.Item>
+      )}
 
       {/* <ImageSectionEditor form={form} sectionData={sectionData} /> */}
 
@@ -157,7 +173,9 @@ const SliderEditor = ({ sectionData, form }) => {
           showActions={showActions}
         />
         <Col span={24}>
-          <Button onClick={handleAddItem}>Novo Item</Button>
+          <Button onClick={handleAddItem}>
+            {Cluar.plainTranslation("slider-editor-button-new-item")}
+          </Button>
         </Col>
       </Row>
     </div>

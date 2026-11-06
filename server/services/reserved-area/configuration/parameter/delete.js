@@ -1,0 +1,32 @@
+import { _db, _val, _req, _out, _header, _exec } from "@netuno/server-types";
+import cluar from "#core/cluar/main.js";
+
+cluar.permission.requireUserAuthorizedInRootOrganization();
+
+const parameterUid = _req.getString("uid");
+
+const dbConfigurationParameter = _db.get("configuration_parameter", parameterUid);
+
+if (!dbConfigurationParameter) {
+  cluar.response.error({ status: 404, error: "parameter not found", error_code: "parameter-not-found" });
+}
+
+const parameterId = dbConfigurationParameter.getInt("id");
+
+// Verifica se existe alguma configuração usando este parâmetro
+const inUse = _db.queryFirst(`
+    SELECT count(id) as total FROM configuration WHERE parameter_id = ?
+`, parameterId);
+
+if (inUse && inUse.getInt("total") > 0) {
+  // Se estiver em uso, bloqueia a exclusão e avisa o usuário
+  cluar.response.error({
+    status: 409,
+    error_code: "configuration-parameter-in-use",
+    error: "the parameter cannot be removed because it is being used by one or more configurations"
+  });
+}
+
+// Se não estiver em uso, apaga normalmente
+_db.delete("configuration_parameter", parameterId);
+cluar.response.successWithoutData({ status: 200 });

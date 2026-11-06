@@ -1,17 +1,21 @@
-
-/**
- *  When service need public access...
- */
-if (_env.is("dev")) {
-    _service.allow()
-}
+import { _service, _env, _exec, _header, _auth } from "@netuno/server-types";
+import cluar from "#core/cluar/main.js";
+import groups from "#core/consts/group.js";
 
 /*
-if (_service.path == 'samples/my-service') {
-    _service.allow()
-}
-*/
+ * Serviços públicos - acessíveis sem login, usados pelo website.
+ * "_auth" e "_auth_provider/*" são serviços internos do Netuno (login
+ * por username/password e OAuth) - têm de ficar sempre públicos, senão
+ * ninguém consegue sequer autenticar-se.
+ */
+const PUBLIC_PATHS = [
+  "contact/post",
+  "recovery/post",
+  "recovery/put",
+  "reserved-area/profile/avatar/get",
+  "reserved-area/action/image/get",
+];
 
-if (_service.path == 'contact/post' || _service.path == 'actions/image/get') {
-    _service.allow()
+if (PUBLIC_PATHS.includes(_service.path)) {
+  _service.allow();
 }

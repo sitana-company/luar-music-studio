@@ -7,11 +7,14 @@ import {
   DeleteOutlined,
   ArrowDownOutlined,
   ArrowUpOutlined,
+  CopyOutlined,
 } from "@ant-design/icons";
 
 import SectionEditor from "./SectionEditor";
 
 import "./index.less";
+
+import Cluar from "../../common/Cluar";
 
 const PageSection = ({
   children,
@@ -25,6 +28,10 @@ const PageSection = ({
   onSortDown,
   disableSortUp = false,
   disableSortDown = false,
+  showAddSectionButton = true,
+  showAddLineButton = true,
+  showDuplicateButton = true,
+  onDuplicateSection,
 }) => {
   const [openEditor, setOpenEditor] = useState(false);
   const [newSectionVisible, setNewSectionVisible] = useState(false);
@@ -33,7 +40,7 @@ const PageSection = ({
     const newSectionData = {
       uid: new Date().getTime(),
       section,
-      title: `<p><span style="background-color: rgba(255, 255, 255, ,0); font-size: 40px; font-family: inherit;">${section}</span></p>`,
+      title: `<span style="font-size: 40px; font-family: inherit;">${section}</span>`,
       image: "",
       actions: [],
       items: [],
@@ -54,6 +61,8 @@ const PageSection = ({
       newSectionData.type = "ContactForm";
     } else if (section === "slider") {
       newSectionData.type = "Default";
+    } else if (section === "row") {
+      newSectionData.type = "Default";
     }
 
     if (onNewSection) {
@@ -70,6 +79,9 @@ const PageSection = ({
 
   const newSection = (
     <Flex vertical gap={8}>
+      {showAddLineButton && (
+        <Button onClick={() => handleNewSection("row")}>Linha</Button>
+      )}
       <Button onClick={() => handleNewSection("slider")}>Slider</Button>
       <Button onClick={() => handleNewSection("banner")}>Banner</Button>
       <Button onClick={() => handleNewSection("listing")}>Lista</Button>
@@ -90,6 +102,11 @@ const PageSection = ({
               <Button onClick={() => setOpenEditor(true)}>
                 <EditOutlined />
               </Button>
+              {showDuplicateButton && (
+                <Button onClick={() => onDuplicateSection?.(sectionData)}>
+                  <CopyOutlined />
+                </Button>
+              )}
               <Button onClick={handleRemoveSection}>
                 <DeleteOutlined />
               </Button>
@@ -115,16 +132,18 @@ const PageSection = ({
                 <ArrowDownOutlined />
               </Button>
             )}
-            <Popover
-              title="Nova seção"
-              trigger="click"
-              content={newSection}
-              onVisibleChange={setNewSectionVisible}
-            >
-              <Button>
-                <PlusCircleOutlined />
-              </Button>
-            </Popover>
+            {showAddSectionButton && (
+              <Popover
+                title={Cluar.plainTranslation("page-section-new-section")}
+                trigger="click"
+                content={newSection}
+                onVisibleChange={setNewSectionVisible}
+              >
+                <Button>
+                  <PlusCircleOutlined />
+                </Button>
+              </Popover>
+            )}
             {sortArrowsVisible && (
               <Button
                 onClick={() => onSortUp(sectionData)}

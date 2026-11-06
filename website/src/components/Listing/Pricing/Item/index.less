@@ -1,0 +1,53 @@
+@import "../../../../styles/variables.less";
+
+.listing__Pricing {
+    .listing__items {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+
+        @media only screen and (max-width: @header-mobile-width) {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+    }
+
+    .listing__item {
+        padding: 32px;
+        min-height: 200px;
+        box-sizing: border-box;
+
+        h4 {
+            margin: 0 0 12px;
+            font-size: 18px;
+        }
+
+        .listing__item__content {
+            p {
+                margin: 0;
+
+                &+p {
+                    margin-top: 20px;
+                }
+            }
+        }
+
+        &:nth-child(3n + 1) {
+            background-color: @site-background;
+            color: @ink;
+        }
+
+        &:nth-child(3n + 2) {
+            background-color: @orange;
+            color: @site-background;
+        }
+
+        &:nth-child(3n + 3) {
+            background-color: @teal;
+            color: @site-background;
+        }
+    }
+}

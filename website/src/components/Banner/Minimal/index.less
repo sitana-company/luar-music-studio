@@ -1,0 +1,149 @@
+@import "../../../styles/variables.less";
+
+.banner {
+    position: relative;
+
+    &__minimal {
+        position: relative;
+        min-height: 700px;
+        display: flex;
+        align-items: center;
+
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
+
+        //padding: @header-size 60px 0 60px;
+        //padding-bottom: 0;
+
+        @media (max-width: @header-desktop-width) {
+            padding-left: 60px;
+            padding-right: 60px;
+        }
+
+        @media only screen and (max-width: @header-mobile-width) {
+            height: auto !important;
+            min-height: calc(100vh - @header-size-mobile);
+            padding: calc(@header-size-mobile + 48px) 24px 60px 24px;
+        }
+    }
+
+    // degradê laranja: reforça contraste sem parecer um filtro genérico
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background: linear-gradient(to right,
+                fade(@orange, 55%) 0%,
+                fade(@orange, 15%) 45%,
+                transparent 70%);
+
+        @media only screen and (max-width: @header-mobile-width) {
+            background: linear-gradient(to bottom,
+                    fade(@orange, 20%) 0%,
+                    fade(@orange, 55%) 45%,
+                    fade(@orange, 25%) 100%);
+        }
+    }
+
+    &__wrapper {
+        width: 100%;
+        max-width: @site-max-width;
+        margin: 0 auto;
+        z-index: 2;
+
+        .banner__badge {
+            display: inline-block;
+            margin-bottom: 24px;
+            padding: 6px 14px;
+            background: @site-background;
+            color: @orange-dark;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        // tipografia do título/conteúdo é controlada pelo Lexical (tamanho, cor, estilo)
+        >h1 {
+            max-width: 700px;
+            margin-bottom: 24px;
+            line-height: 0.92;
+
+            // zera a margem que o Lexical adiciona em cada linha/parágrafo interno
+            p,
+            div,
+            span {
+                margin: 0;
+                line-height: inherit;
+            }
+        }
+
+        >div {
+            max-width: 560px;
+            margin-bottom: 32px;
+        }
+
+        .banner__actions {
+            .actions {
+                display: flex !important;
+                gap: 16px;
+                padding-left: 0;
+                flex-wrap: wrap;
+
+                @media only screen and (max-width: @header-mobile-width) {
+                    flex-direction: column;
+
+                    li {
+                        min-width: 100%;
+                    }
+                }
+
+                .actions__item {
+                    width: auto !important;
+                    margin: 0 !important;
+                    border-radius: 2px;
+                    cursor: pointer;
+
+                    h4 {
+                        font-size: 0.85em;
+                        letter-spacing: 0.1em;
+                        text-transform: uppercase;
+                        margin-bottom: 0;
+                    }
+
+                    p {
+                        display: none;
+                    }
+                }
+
+                .actions__item--cursos {
+                    background-color: @saffron !important;
+                    border-color: @saffron !important;
+
+                    h4 {
+                        color: #2a1a14;
+                    }
+
+                    &:hover {
+                        background-color: darken(@saffron, 8%) !important;
+                    }
+                }
+
+                .actions__item--contacto {
+                    background-color: @teal !important;
+                    border-color: @teal !important;
+
+                    h4 {
+                        color: @site-background;
+                    }
+
+                    &:hover {
+                        background-color: darken(@teal, 8%) !important;
+                    }
+                }
+            }
+        }
+    }
+}

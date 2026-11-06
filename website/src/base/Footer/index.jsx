@@ -1,11 +1,11 @@
-import React from 'react';
-import { Layout, Row, Col } from 'antd';
-import { PhoneOutlined, HomeOutlined, MailOutlined } from '@ant-design/icons';
-import { FaHome, FaPhone, FaEnvelope, FaYoutube, FaGithub, FaFacebook, FaLinkedin, FaTwitter, FaInstagram, FaDiscord } from 'react-icons/fa';
-import { RiOpenSourceFill } from 'react-icons/ri';
-import Configuration from '../../components/Configuration';
+import React from "react";
+import { Layout, Row, Col } from "antd";
+import { PhoneOutlined, HomeOutlined, MailOutlined } from "@ant-design/icons";
+import { FaHome, FaPhone, FaEnvelope, FaYoutube, FaGithub, FaFacebook, FaLinkedin, FaTwitter, FaInstagram, FaDiscord } from "react-icons/fa";
+import { RiOpenSourceFill } from "react-icons/ri";
+import Configuration from "../../components/Configuration";
 
-import './index.less';
+import "./index.less";
 
 const { Footer } = Layout;
 
@@ -23,17 +23,17 @@ function BaseFooter() {
             <Col><HomeOutlined /></Col>
             <Col>&nbsp;</Col>
             <Col>
-              <address><Configuration parameter="footer-address" multilines/></address>
+              <address><Configuration parameter="footer-address" multilines /></address>
             </Col>
           </Row>
           <Row>
             <Col>
-              <p><PhoneOutlined /> <Configuration parameter="footer-phone"/></p>
+              <p><PhoneOutlined /> <Configuration parameter="footer-phone" /></p>
             </Col>
           </Row>
           <Row>
             <Col>
-              <p><MailOutlined /> <Configuration parameter="footer-email"/></p>
+              <p><MailOutlined /> <Configuration parameter="footer-email" /></p>
             </Col>
           </Row>
           <p className="footer__social-links">

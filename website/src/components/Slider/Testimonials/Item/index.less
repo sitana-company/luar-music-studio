@@ -1,0 +1,35 @@
+@import "../../../../styles/variables.less";
+
+.slider__item__Testimonials {
+
+    // tipografia (tamanho/cor) do texto real é controlada pelo Lexical;
+    // aqui só cuidamos de família da fonte, itálico e as aspas decorativas
+    .slider__item__quote {
+        margin: 0 0 32px;
+        font-family: @serif;
+        font-style: italic;
+        font-size: 32px;
+        line-height: 1.35;
+        color: @ink;
+
+        &::before {
+            content: "\201C"; // aspas curvas de abertura, geradas via CSS
+        }
+
+        &::after {
+            content: "\201D"; // aspas curvas de fechamento, geradas via CSS
+        }
+
+        @media only screen and (max-width: @header-mobile-width) {
+            font-size: 22px;
+        }
+    }
+
+    .slider__item__author {
+        color: @ink-mute;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+}

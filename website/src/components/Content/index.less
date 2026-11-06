@@ -2,28 +2,34 @@
 
 .content {
     width: 100%;
-    max-width: calc(@site-max-width + 120px);
-    margin: 50px auto;
-    padding: 0 60px;
-    display: flex;
+    padding-top: 60px;
+    padding-bottom: 60px;
+    box-sizing: border-box;
 
-    @media only screen and (max-width: 800px) {
-        padding: 0 20px;
-        margin: 20px auto;
+    padding-left: 50px;
+    padding-right: 50px;
+
+    background: fade(@site-background, 92%);
+
+    @media (max-width: @header-desktop-width) {
+        padding-left: 60px;
+        padding-right: 60px;
+    }
+
+    @media only screen and (max-width: @header-mobile-width) {
+        padding: calc(@header-size-mobile + 48px) 24px 48px;
         flex-wrap: wrap;
     }
 
-    // &--full-width {
-    //     width: 100%;
-    //     margin: 50px auto;
-    //     display: flex;
-    // }
-
-    &--background-orange {
+    &__wrapper {
         width: 100%;
-        margin: 50px auto 0 auto;
-        padding: 30px 60px;
-        background-color: #FF6E1A;
+        max-width: @site-max-width;
+        margin: 0 auto;
+        display: flex;
+
+        @media only screen and (max-width: @header-mobile-width) {
+            flex-wrap: wrap;
+        }
     }
 
     >div {
@@ -33,7 +39,7 @@
     >ul.actions {
         width: 300px;
 
-        @media only screen and (max-width: 800px) {
+        @media only screen and (max-width: @header-mobile-width) {
             width: 100%;
         }
     }
@@ -64,6 +70,16 @@
             }
         }
     }
+
+    &__text {}
+
+    &__image-left {}
+
+    &__image-right {}
+
+    &__image-top {}
+
+    &__image-bottom {}
 
     &__text-service {
         >h1 {
@@ -118,6 +134,18 @@
             a {
                 color: @primary-color;
             }
+        }
+    }
+
+    // full-bleed para o CTA: remove o padding/max-width padrão do Content
+    // e desliga o flex do wrapper, que forçava o encolhimento (flex-shrink)
+    // do .content-cta mesmo com width: 100%.
+    &--Cta {
+        padding: 0;
+
+        .content__wrapper {
+            max-width: none;
+            display: block;
         }
     }
 }

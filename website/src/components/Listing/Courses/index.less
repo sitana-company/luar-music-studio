@@ -1,0 +1,36 @@
+@import "../../../styles/variables.less";
+
+.listing__Courses {
+    width: 100%;
+    padding: 96px 60px;
+    box-sizing: border-box;
+
+    @media only screen and (max-width: @header-mobile-width) {
+        padding: 60px 24px;
+    }
+
+    .listing__wrapper {
+        max-width: @site-max-width;
+        margin: 0 auto;
+
+        .listing__badge {
+            margin-bottom: 12px;
+            color: @orange;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        // tipografia do título/conteúdo é controlada pelo Lexical
+        >h1 {
+            max-width: 640px;
+            margin-bottom: 16px;
+        }
+
+        .listing__intro {
+            max-width: 640px;
+            margin-bottom: 48px;
+        }
+    }
+}

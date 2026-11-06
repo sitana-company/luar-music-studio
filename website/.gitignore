@@ -36,9 +36,10 @@ src/config/config.json
 /build/
 /dist/
 
-/public/cluar
 
 /public/cluarData.js
+
+/public/root.css
 
 /public/reauthkit.js
 
@@ -49,7 +50,3 @@ src/config/config.json
 /public/images/functionality/
 /public/images/listing/
 /public/images/listing_item/
-
-src/pages/Template/*
-!src/pages/Template/Default/
-!src/pages/Template/Default/index.jsx

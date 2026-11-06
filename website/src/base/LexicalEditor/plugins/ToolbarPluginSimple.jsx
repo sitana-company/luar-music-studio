@@ -16,7 +16,7 @@ import {
   PlusOutlined,
   RedoOutlined,
   UndoOutlined
-} from '@ant-design/icons';
+} from "@ant-design/icons";
 import {
   $createParagraphNode,
   $getSelection,
@@ -31,11 +31,13 @@ import {
   SELECTION_CHANGE_COMMAND,
   UNDO_COMMAND
 } from "lexical";
-import { mergeRegister } from '@lexical/utils';
+import { mergeRegister } from "@lexical/utils";
 import { $createHeadingNode, $createQuoteNode } from "@lexical/rich-text";
 import { $setBlocksType, $getSelectionStyleValueForProperty, $patchStyleText, $isAtNodeEnd } from "@lexical/selection";
 import { $isLinkNode, TOGGLE_LINK_COMMAND, $createLinkNode } from "@lexical/link";
 import { $createListNode, INSERT_CHECK_LIST_COMMAND } from "@lexical/list";
+
+import Cluar from "../../../common/Cluar";
 
 import FloatingEditor from "../components/FloatingEditor";
 import FloatingLinkEditor from "../components/FloatingLinkEditor";
@@ -57,9 +59,9 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
   const [currentFontFamily, setCurrentFontFamily] = useState(FONT_FAMILY_OPTIONS[0][0]);
   const [currentFontSize, setCurrentFontSize] = useState("40");
 
-  const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
-  const [currentFontColor, setCurrentFontColor] = useState(isDarkMode ? '#ffffff' : "#000000");
-  const [currentBgColor, setCurrentBgColor] = useState('');
+  const isDarkMode = document.documentElement.getAttribute("data-theme") === "dark";
+  const [currentFontColor, setCurrentFontColor] = useState(isDarkMode ? "#ffffff" : "#000000");
+  const [currentBgColor, setCurrentBgColor] = useState("");
   const [isLink, setIsLink] = useState(false);
   const [currentTextAlign, setCurrentTextAlign] = useState("left");
 
@@ -84,7 +86,6 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
 
   const updateToolbar = useCallback(() => {
     const selection = $getSelection();
-    console.log("selection: ", selection);
 
     if (!$isRangeSelection(selection)) {
       setIsSelected(false);
@@ -101,27 +102,27 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
     const getStyleValue = (property, fallback = "") => $getSelectionStyleValueForProperty(selection, property, fallback);
 
     // Font Family
-    const fontFamily = getStyleValue('font-family');
+    const fontFamily = getStyleValue("font-family");
     if (fontFamily) setCurrentFontFamily(fontFamily);
 
     // Font Size (sem 'px')
-    const fontSize = getStyleValue('font-size');
-    setCurrentFontSize(fontSize ? fontSize.replace('px', '') : "40");
+    const fontSize = getStyleValue("font-size");
+    setCurrentFontSize(fontSize ? fontSize.replace("px", "") : "40");
 
     // Font Color
-    const fontColor = getStyleValue('color');
+    const fontColor = getStyleValue("color");
     if (fontColor) {
       setCurrentFontColor(fontColor);
     }
     // Background Color
-    const bgColor = getStyleValue('background-color');
+    const bgColor = getStyleValue("background-color");
     if (bgColor) setCurrentBgColor(bgColor);
 
     const anchorNode = selection.anchor.getNode();
     const element = anchorNode.getParent();
 
     if (element) {
-      const textAlign = element.getStyle('text-align');
+      const textAlign = element.getStyle("text-align");
       if (textAlign) {
         setCurrentTextAlign(textAlign);
       } else {
@@ -199,14 +200,14 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
   }, [editor, updateToolbar]);
 
   const formatLabels = {
-    'paragraph': 'Normal',
-    'h1': 'Heading 1',
-    'h2': 'Heading 2',
-    'h3': 'Heading 3',
-    'bullet': 'Bullet List',
-    'number': 'Number List',
-    'check': 'Check List',
-    'quote': 'Quote'
+    "paragraph": "Normal",
+    "h1": "Heading 1",
+    "h2": "Heading 2",
+    "h3": "Heading 3",
+    "bullet": "Bullet List",
+    "number": "Number List",
+    "check": "Check List",
+    "quote": "Quote"
   };
 
   const getFormatLabel = useCallback((key) => {
@@ -214,7 +215,6 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
   }, [formatLabels]);
 
   const applyFontFamily = useCallback((fontFamily) => {
-    //console.log("applyFontFamily", fontFamily);
 
     editor.update(() => {
       const selection = $getSelection();
@@ -233,14 +233,12 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
   }, [editor]);
 
   const applyFontSize = useCallback((fontSize) => {
-    console.log("applyFontSize", fontSize);
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
-        const fontSizeWithUnit = fontSize.toString().includes('px') ? fontSize : `${fontSize}px`;
+        const fontSizeWithUnit = fontSize.toString().includes("px") ? fontSize : `${fontSize}px`;
         $patchStyleText(selection, { "font-size": fontSizeWithUnit });
 
-        //console.log('Applied font size:', fontSizeWithUnit);
       }
     });
     setCurrentFontSize(fontSize);
@@ -331,10 +329,10 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
 
   const handleInsertMenuClick = ({ key }) => {
     switch (key) {
-      case '1':
+      case "1":
         setIsImageModalOpen(true);
         break;
-      case '2':
+      case "2":
         setIsColumnsModalOpen(true);
         break;
       default:
@@ -356,22 +354,22 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
         onClick={() => {
           editor.dispatchCommand(UNDO_COMMAND, undefined);
         }}
-        title="Desfazer"
+        title={Cluar.plainTranslation("toolbar-undo")}
         type="button"
         className="toolbar-item"
       >
-        <UndoOutlined style={{ transform: 'rotate(90deg)', fontSize: 15 }} />
+        <UndoOutlined style={{ transform: "rotate(90deg)", fontSize: 15 }} />
       </button>
       <button
         disabled={!canRedo}
         onClick={() => {
           editor.dispatchCommand(REDO_COMMAND, undefined);
         }}
-        title="Refazer"
+        title={Cluar.plainTranslation("toolbar-redo")}
         type="button"
         className="toolbar-item"
       >
-        <RedoOutlined style={{ transform: 'rotate(-90deg)', fontSize: 15 }} />
+        <RedoOutlined style={{ transform: "rotate(-90deg)", fontSize: 15 }} />
       </button>
 
 
@@ -381,7 +379,7 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
         <Dropdown
           open={fontFamilyDropdownVisible}
           onOpenChange={setFontFamilyDropdownVisible}
-          trigger={['click']}
+          trigger={["click"]}
           menu={{
             items: FONT_FAMILY_OPTIONS.map(([font, label]) => ({
               key: font,
@@ -396,7 +394,7 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
         >
           <button
             className="toolbar-item dropdown-button"
-            title="Fonte"
+            title={Cluar.plainTranslation("toolbar-font")}
             type="button"
           >
             <span style={{ fontFamily: currentFontFamily }}>{FONT_FAMILY_OPTIONS.find((i) => i[0] === currentFontFamily) ? FONT_FAMILY_OPTIONS.find((i) => i[0] === currentFontFamily)[1] : currentFontFamily}</span>
@@ -406,13 +404,13 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
 
       <div className="divider" />
 
-      <div className="font-size-container" style={{ display: 'flex', alignItems: 'center' }}>
+      <div className="font-size-container" style={{ display: "flex", alignItems: "center" }}>
         <button
           className="toolbar-item"
-          title="Diminuir tamanho da fonte"
+          title={Cluar.plainTranslation("toolbar-font-size-decrease")}
           type="button"
           onClick={decreaseFontSize}
-          style={{ padding: '0 8px' }}
+          style={{ padding: "0 8px" }}
         >
           -
         </button>
@@ -425,17 +423,17 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
         />
         <button
           className="toolbar-item"
-          title="Aumentar tamanho da fonte"
+          title={Cluar.plainTranslation("toolbar-font-size-increase")}
           type="button"
           onClick={increaseFontSize}
-          style={{ padding: '0 8px' }}
+          style={{ padding: "0 8px" }}
         >
           +
         </button>
       </div>
       <div className="divider" />
-      <div className="font-color-container" style={{ display: 'flex', alignItems: 'center' }}>
-        <FontColorsOutlined style={{ width: 18, height: 18, marginRight: 4, verticalAlign: 'middle' }} />
+      <div className="font-color-container" style={{ display: "flex", alignItems: "center" }}>
+        <FontColorsOutlined style={{ width: 18, height: 18, marginRight: 4, verticalAlign: "middle" }} />
         <ColorPicker
           value={currentFontColor}
           onChange={applyFontColor}
@@ -453,15 +451,15 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
           }}
           presets={[
             {
-              label: 'Presets',
-              colors: ['#000000', '#ff4d4f', '#52c41a', '#1677ff', '#faad14', '#eb2f96']
+              label: "Presets",
+              colors: ["#000000", "#ff4d4f", "#52c41a", "#1677ff", "#faad14", "#eb2f96"]
             }
           ]}
         />
       </div>
 
-      <div className="bg-color-container" style={{ display: 'flex', alignItems: 'center', marginLeft: '8px' }}>
-        <BgColorsOutlined style={{ width: 18, height: 18, marginRight: 4, verticalAlign: 'middle' }} />
+      <div className="bg-color-container" style={{ display: "flex", alignItems: "center", marginLeft: "8px" }}>
+        <BgColorsOutlined style={{ width: 18, height: 18, marginRight: 4, verticalAlign: "middle" }} />
         <ColorPicker
           value={currentBgColor}
           onChange={applyBgColor}
@@ -479,8 +477,8 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
           }}
           presets={[
             {
-              label: 'Presets',
-              colors: ['#fffff', '#000000', '#ff4d4f', '#52c41a', '#1677ff', '#faad14', '#eb2f96']
+              label: "Presets",
+              colors: ["#fffff", "#000000", "#ff4d4f", "#52c41a", "#1677ff", "#faad14", "#eb2f96"]
             }
           ]}
         />
@@ -489,27 +487,27 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
 
       <div className="divider" />
       <button
-        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')}
+        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold")}
         className={`toolbar-item ${isBold ? "active" : ""}`}
-        title="Negrito"
+        title={Cluar.plainTranslation("toolbar-bold")}
         type="button"
       >
         <i>B</i>
       </button>
       <button
-        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')}
+        onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic")}
         className={`toolbar-item ${isItalic ? "active" : ""}`}
-        title="Itálico"
+        title={Cluar.plainTranslation("toolbar-italic")}
         type="button"
       >
         <i>I</i>
       </button>
       <button
         onClick={() => {
-          editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline');
+          editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
         }}
         className={`toolbar-item ${isUnderline ? "active" : ""}`}
-        title="Sublinhado"
+        title={Cluar.plainTranslation("toolbar-underline")}
         type="button"
       >
         <i>U</i>
@@ -517,13 +515,13 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
 
       <button
         onClick={() => insertLink()}
-        title="Inserir Link"
+        title={Cluar.plainTranslation("toolbar-link")}
         type="button"
-        className={isLink ? 'btn-active' : 'btn-inactive'}
+        className={isLink ? "btn-active" : "btn-inactive"}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           padding: 6,
           width: 32,
           height: 32,
@@ -537,13 +535,13 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
         createPortal(<FloatingEditor editor={editor} />, document.body)}
       <div className="divider" />
 
-      <div className="alignment-buttons-container" style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'nowrap' }}>
+      <div className="alignment-buttons-container" style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "nowrap" }}>
         <button
           onClick={() => {
-            editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'left');
+            editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left");
           }}
           className="toolbar-item spaced"
-          aria-label="Left Align"
+          aria-label={Cluar.plainTranslation("toolbar-align-left")}
           type="button"
         >
           <AlignLeftOutlined />
@@ -551,10 +549,10 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
 
         <button
           onClick={() => {
-            editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'center');
+            editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center");
           }}
           className="toolbar-item spaced"
-          aria-label="Center Align"
+          aria-label={Cluar.plainTranslation("toolbar-align-center")}
           type="button"
         >
           <AlignCenterOutlined />
@@ -562,10 +560,10 @@ export default function ToolbarPluginSimple({ onToggleHtmlMode, isHtmlMode }) {
 
         <button
           onClick={() => {
-            editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right');
+            editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right");
           }}
           className="toolbar-item spaced"
-          aria-label="Right Align"
+          aria-label={Cluar.plainTranslation("toolbar-align-right")}
           type="button"
         >
           <AlignRightOutlined />

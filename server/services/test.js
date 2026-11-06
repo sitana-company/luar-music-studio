@@ -1,16 +1,16 @@
-// _core: openAI
+import { _req } from "@netuno/server-types";
+import cluar from "#core/cluar/main.js";
+import { OpenAI } from "#core/openAI.js";
 
 const currentHtml = _req.getString("html", "");
 const userPrompt = _req.getString("prompt", null);
 
 if (!userPrompt) {
-    _header.status(400);
-    _out.json(
-        _val.map()
-            .set("result", false)
-            .set("error", "O parâmetro 'prompt' é obrigatório")
-    );
-    _exec.stop();
+  cluar.response.error({
+    status: 400,
+    error_code: "prompt-required",
+    error: "the 'prompt' parameter is required"
+  });
 }
 
 const openai = new OpenAI();
@@ -18,17 +18,15 @@ const openai = new OpenAI();
 const result = openai.processHtml(currentHtml, userPrompt);
 
 if (result.getBoolean("success")) {
-    _out.json(
-        _val.map()
-            .set("result", true)
-            .set("html", result.getString("html"))
-    );
+  cluar.response.successWithData({
+    status: 200,
+    data: result.getString("html")
+  });
 } else {
-    _header.status(500);
-    _out.json(
-        _val.map()
-            .set("result", false)
-            .set("error", result.getString("error"))
-            .set("details", result.get("details"))
-    );
+  cluar.response.error({
+    status: 500,
+    error_code: "openai-service-failed",
+    error: result.getString("error"),
+    details: result.get("details")
+  });
 }

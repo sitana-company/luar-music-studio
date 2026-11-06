@@ -1,0 +1,285 @@
+@import "../../styles/variables.less";
+
+.ant-layout-header {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    top: 0;
+    z-index: 3;
+    background: fade(@site-background, 92%);
+    backdrop-filter: blur(8px);
+    width: 100%;
+    height: @header-size !important;
+    line-height: @header-size !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+    font-family: @sans !important;
+
+    @media (max-width: @header-desktop-width) {
+        padding: 0 60px !important;
+    }
+
+    @media (max-width: @header-mobile-width) {
+        padding: 0 24px !important;
+        height: @header-size-mobile !important;
+        line-height: @header-size-mobile !important;
+    }
+
+    &--logged {
+        top: 40px;
+        margin: auto;
+
+        @media (max-width: @header-mobile-width) {
+            padding: 0 24px !important;
+        }
+
+    }
+
+    &__wrapper {
+        width: 100%;
+        max-width: @site-max-width;
+        display: flex;
+
+        @media (max-width: @header-mobile-width) {
+            justify-content: space-between;
+        }
+    }
+
+    >*:not(.menu-burger-open) {
+        z-index: 3;
+    }
+
+    &.header-burger-open .menu {
+        z-index: 0;
+    }
+
+    .logo {
+        display: flex;
+        align-items: left;
+        justify-content: start;
+        width: @logo-width;
+        height: auto;
+
+        a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            img {
+                width: auto;
+                height: 55px;
+            }
+        }
+
+        @media only screen and (max-width: @header-mobile-width) {
+            width: auto;
+            max-width: 400px;
+
+            a {
+                img {
+                    max-width: auto;
+                    height: 32px;
+                }
+            }
+        }
+    }
+
+    .burger-language {
+        display: flex;
+        align-items: center;
+
+        &__theme-switch {
+            @media only screen and (max-width: @header-mobile-width) {
+                display: none;
+            }
+        }
+    }
+
+    .menu-languages {
+        line-height: @header-line-height !important;
+        background-color: transparent;
+        color: @header-menu-color;
+        border-bottom: none;
+        display: flex;
+        flex-direction: row-reverse;
+        width: auto !important;
+        padding: 0 12px !important;
+
+
+
+        .ant-menu-submenu-title:hover {
+            color: @header-menu-color-hover !important;
+        }
+
+        li {
+            display: inline;
+            letter-spacing: 0.12em;
+
+            &:hover {
+                border-color: @header-menu-color-hover !important;
+            }
+        }
+    }
+
+    .menu {
+        width: 100%;
+        line-height: @header-line-height !important;
+
+        @media only screen and (max-width: @header-mobile-width) {
+            display: none;
+        }
+
+        ul {
+            width: 100%;
+            background-color: transparent;
+            margin-left: auto;
+            border-bottom: none;
+            border-right: none;
+            justify-content: flex-end;
+            gap: 4px;
+
+            li {
+                border: 0 !important;
+                background-color: transparent !important;
+                padding: 0 12px !important;
+
+                &.menu-item-contacto {
+                    display: flex !important;
+                    align-items: center !important;
+                    height: auto !important;
+                    line-height: normal !important;
+                    padding: 0 4px !important; // espaço lateral no menu, o padding "real" vai no <a>
+                    margin: 0 4px !important;
+
+                    // remove a barrinha de item selecionado do antd
+                    &::after {
+                        display: none !important;
+                    }
+
+                    a {
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        padding: 11px 22px !important;
+                        background: @teal !important;
+                        color: @site-background !important;
+                        font-weight: 600;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        border-radius: 2px;
+                        line-height: 1 !important;
+                        transition: background 0.2s ease;
+
+                        &:hover {
+                            background: darken(@teal, 8%) !important;
+                            color: @site-background !important;
+                        }
+                    }
+                }
+
+                &:after {
+                    content: unset;
+                }
+
+                @media screen and (max-width: @header-mobile-width) {
+                    display: block;
+                }
+
+                &:hover {
+                    a {
+                        color: @header-menu-color-hover;
+                    }
+
+                    border-color: @header-menu-color-hover !important;
+                }
+
+                a {
+                    color: @header-menu-color;
+                    font-size: 13px;
+                    font-weight: 400;
+                    letter-spacing: 0.14em;
+                    text-transform: uppercase;
+                    text-decoration: none;
+                }
+            }
+        }
+
+        &-languages {
+            @media screen and (max-width: @header-mobile-width) {
+                position: static;
+                transform: none;
+            }
+        }
+    }
+
+    .menu-burger-button {
+        width: auto;
+        height: auto;
+        z-index: 9999;
+
+        @media only screen and (min-width: calc(@header-mobile-width + 1px)) {
+            display: none;
+        }
+    }
+
+    .menu-burger {
+        @media only screen and (min-width: calc(@header-mobile-width + 1px)) {
+            display: none;
+        }
+
+        &__theme-switch {
+            padding: 12px 24px;
+        }
+    }
+
+    .menu-level-1 {
+        /* SAMPLE OF MENU CUSTOM LEVEL */
+    }
+}
+
+.ant-menu-sub,
+.ant-menu-submenu-popup {
+    border-radius: 2px !important;
+}
+
+// Escopado apenas para o menu-burger (mobile), não para .menu (desktop),
+// pra evitar que o menu desktop também vire position:fixed quando o burger abre.
+.header-burger-open .menu-burger {
+    display: block;
+    position: fixed;
+    width: 100%;
+    // vh em vez de % — o .ant-layout-header tem backdrop-filter, o que o torna
+    // containing block de elementos position:fixed dentro dele. Isso faz "%"
+    // resolver contra a altura do header (pequena) em vez do viewport.
+    height: calc(100vh - @header-size);
+    top: @header-size;
+    left: 0;
+    right: 0;
+    z-index: 9998;
+    background-color: @mobile-menu-background;
+    padding: @mobile-menu-padding-vertical @mobile-menu-padding-horizontal;
+    overflow: auto;
+    margin-top: 0;
+
+    @media only screen and (max-width: @header-mobile-width) {
+        // dvh se ajusta dinamicamente à barra de endereço do navegador mobile;
+        // a linha com vh acima serve de fallback para navegadores sem suporte a dvh.
+        height: calc(100vh - @header-size-mobile);
+        height: calc(100dvh - @header-size-mobile);
+        top: @header-size-mobile;
+    }
+}
+
+.burger .burger-lines,
+.burger .burger-lines:after,
+.burger .burger-lines:before {
+    background-color: @header-menu-color !important;
+    left: 0 !important;
+    max-width: 3em !important;
+    width: 100% !important;
+
+}
+
+.burger.burger-slip.open .burger-lines {
+    background-color: initial !important;
+}

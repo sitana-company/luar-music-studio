@@ -4,6 +4,7 @@ import { Form, Select } from "antd";
 
 import _service from "@netuno/service-client";
 import Cluar from "../../../common/Cluar"
+import MetadataEditor from "../../../base/MetadataEditor";
 
 const FunctionalityEditor = ({ sectionData, form }) => {
   const [typeOptions, setTypeOptions] = useState([]);
@@ -11,35 +12,41 @@ const FunctionalityEditor = ({ sectionData, form }) => {
 
   const [showActions, setShowActions] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
+  const [showMetadata, setShowMetadata] = useState(false);
 
-  const actionsData = Cluar.actions() || [];
+  const currentLangCode = Cluar.currentLanguage()?.code;
+  const allActions = Cluar.actions() || [];
+  const actionsData = allActions.filter(
+    (action) => action.language_code === currentLangCode
+  );
 
   useEffect(() => {
     _service({
-      url: "/components/functionality/list",
+      url: "/reserved-area/component/functionality/list",
       method: "POST",
       data: {
         language: Cluar.currentLanguage().locale
       },
       success: (res) => {
-        setTypeOptions(res.json.types);
-        setConfig(res.json.config);
+        setTypeOptions(res.json.data.types);
+        setConfig(res.json.data.config);
 
         const initialType = form.getFieldValue("type");
         setSelectedType(initialType);
 
-        const typeConfig = res.json.config.find(c => c.name === initialType);
+        const typeConfig = res.json.data.config.find(c => c.name === initialType);
         setShowActions(typeConfig?.action || false);
+        setShowMetadata(typeConfig?.metadata || false);
       },
       fail: (error) => {
-        console.log(error);
+        console.error(error);
       },
     });
   }, []);
 
   return (
     <div className="functionality-editor">
-      <Form.Item label="Tipo" name="type">
+      <Form.Item label={Cluar.plainTranslation("functionality-editor-field-type")} name="type">
         <Select
           options={typeOptions.map((item) => ({
             label: item.info.label,
@@ -50,21 +57,28 @@ const FunctionalityEditor = ({ sectionData, form }) => {
 
             const typeConfig = config.find(c => c.name === value);
             setShowActions(typeConfig?.action || false);
+            setShowMetadata(typeConfig?.metadata || false);
           }}
         />
       </Form.Item>
 
       {showActions && (
-        <Form.Item label="Actions" name="action_uids">
+        <Form.Item label={Cluar.plainTranslation("functionality-editor-field-actions")} name="action_uids">
           <Select
             options={actionsData.map((action) => ({
               label: action.title,
               value: action.uid,
             }))}
-            placeholder="Adicionar"
+            placeholder={Cluar.plainTranslation("functionality-editor-placeholder-add")}
             mode="multiple"
             allowClear
           />
+        </Form.Item>
+      )}
+
+      {showMetadata && (
+        <Form.Item label="Metadata" name="metadata">
+          <MetadataEditor />
         </Form.Item>
       )}
     </div>

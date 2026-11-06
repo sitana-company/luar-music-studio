@@ -1,0 +1,49 @@
+import { _db, _user, _req } from "@netuno/server-types";
+import cluar from "#core/cluar/main.js"
+
+const profileUid = _req.getString("uid");
+
+const dbProfile = _db.queryFirst(`
+    SELECT * FROM profile WHERE uid = ?::uuid 
+`, profileUid);
+
+const loggedUserUid = cluar.user.getProfile().getString("uid");
+if (profileUid === loggedUserUid) {
+  cluar.response.error({ status: 409, error: "users cannot delete themselves", error_code: "cannot-delete-self" });
+}
+
+if (!dbProfile) {
+  cluar.response.error({ status: 404, error: "user not found", error_code: "user-not-found" });
+}
+
+// o usuário só pode ser deletado se ele perterncer à apenas uma organização
+// essa organização deve estar na árvore de organizações do usuário logado
+const profileId = dbProfile.getInt("id");
+const membership = _db.queryFirst(`
+    SELECT
+        count(*) over(),
+        organization.id AS organization_id
+    FROM organization_profile
+    INNER JOIN organization
+    ON organization_profile.organization_id = organization.id
+    WHERE profile_id = ${_db.param("int")} 
+`, profileId);
+
+if (membership.getInt("count") > 1) {
+  cluar.response.error({
+    status: 409,
+    error_code: "user-in-multiple-organizations",
+    error: "cannot remove user, they belong to more than one organization"
+  });
+}
+
+const userOrganizationId = membership.getInt("organization_id");
+cluar.permission.requireUserAuthorizedInOrganization(userOrganizationId);
+
+_db.execute(`DELETE from organization_profile WHERE profile_id = ${profileId}`);
+_db.delete(
+  "profile",
+  profileId
+);
+_user.remove(dbProfile.getInt("profile_user_id"));
+cluar.response.successWithoutData({ status: 200 });

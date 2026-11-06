@@ -1,0 +1,67 @@
+@import "../../../styles/variables.less";
+
+.slider__Testimonials {
+    width: 100%;
+    padding: 96px 60px;
+    box-sizing: border-box;
+    background: fade(@site-background, 92%);
+
+    @media only screen and (max-width: @header-mobile-width) {
+        padding: 60px 24px;
+    }
+
+    .slider__wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+        text-align: center;
+
+        .slider__badge {
+            margin-bottom: 32px;
+            color: @orange;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+    }
+
+    // ── Navegação: setas + contador ──────────────────────────
+    .slider__nav {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        margin-top: 48px;
+
+        &__arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border: 1px solid @line-strong;
+            background: transparent;
+            color: @ink;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+
+            &:hover {
+                background: fade(@ink, 5%);
+            }
+        }
+
+        &__counter {
+            min-width: 60px;
+            padding: 0 16px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid @line-strong;
+            border-bottom: 1px solid @line-strong;
+            color: @ink-mute;
+            font-size: 13px;
+        }
+    }
+}

@@ -1,5 +1,5 @@
-import React, { Children, useEffect } from 'react';
-import { ConfigProvider, Layout, theme } from 'antd';
+import React, { Children, useEffect } from "react";
+import { ConfigProvider, Layout, theme } from "antd";
 import {
   BrowserRouter,
   Routes,
@@ -8,8 +8,10 @@ import {
   useLocation,
 } from "react-router";
 
-import { Provider, useDispatch, useSelector } from 'react-redux';
-import { Store } from './redux/store';
+import { Provider, useDispatch, useSelector } from "react-redux";
+import { Store } from "./redux/store";
+import _service from "@netuno/service-client";
+import { loggedUserInfoAction } from "./redux/actions";
 
 //import Analytics from './common/Analytics';
 import Cluar from "./common/Cluar";
@@ -19,15 +21,15 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ReservedArea from "./pages/ReservedArea";
 import Profile from "./pages/Manage/Profile";
-import Pages from "./pages/Manage/Pages";
-import Users from "./pages/Manage/Users";
-import Languages from "./pages/Manage/Languages";
+import Page from "./pages/Manage/Page";
+import User from "./pages/Manage/User";
+import Language from "./pages/Manage/Language";
 import Configuration from "./pages/Manage/Configuration";
-import Dictionary from "./pages/Manage/Dictionary";
+import Translation from "./pages/Manage/Translation";
 import Recovery from "./pages/Recovery";
 import Organization from "./pages/Manage/Organization";
 import Template from "./pages/Template";
-import { setTheme } from './redux/actions/theme';
+import { setTheme } from "./redux/actions/theme";
 
 import "@animated-burgers/burger-slip/dist/styles.css?inline";
 import "sal.js/dist/sal.css?inline";
@@ -36,13 +38,13 @@ import "keen-slider/keen-slider.min.css";
 import _auth from "@netuno/auth-client";
 
 import "./styles/App.less";
-import Actions from './pages/Manage/Actions';
+import Action from "./pages/Manage/Action";
 
 const { Content } = Layout;
 
 const ThemedConfigProvider = ({ children }) => {
   const dispatch = useDispatch();
-  const themeMode = useSelector((state) => state.theme?.mode || 'light');
+  const themeMode = useSelector((state) => state.theme?.mode || "light");
 
   useEffect(() => {
     const saved = localStorage.getItem("theme");
@@ -62,21 +64,19 @@ const ThemedConfigProvider = ({ children }) => {
   return (
     <ConfigProvider
       theme={{
+        cssVar: true,
         token: {
           colorPrimary: Cluar.configuration("primary-color") || "#FF6E1A",
           fontSize: Cluar.configuration("text-font-base") !== "text-font-base" ? Number(Cluar.configuration("text-font-base")) : 16,
           borderRadius: 7,
-          colorBgLayout: themeMode === 'light' ? Cluar.configuration("background-color-light") || '#fff' : Cluar.configuration("background-color-dark") || '#000',
-          colorBgFlex: themeMode === "light" ? Cluar.configuration("background-color-light") || '#fff' : Cluar.configuration("background-color-dark") || '#000',
+          colorBgLayout: themeMode === "light" ? Cluar.configuration("background-color-light") || "#fff" : Cluar.configuration("background-color-dark") || "#000",
+          colorBgFlex: themeMode === "light" ? Cluar.configuration("background-color-light") || "#fff" : Cluar.configuration("background-color-dark") || "#000",
         },
         components: {
           Layout: {
             headerBg: themeMode === "light" ? "#fff" : "#141414",
             footerBg: themeMode === "light" ? "#E6E6E6" : "#141414",
-          },
-          Input: {
-            colorBorder: themeMode === "light" && "#434343"
-          },
+          }
         },
         algorithm: antdAlgorithm,
       }}
@@ -99,39 +99,58 @@ function App() {
     }
   }
 
-  const routes = [];
+  const pageRoutes = [];
   for (const language of Cluar.languages()) {
     if (!Cluar.pages()[language.code]) {
       continue;
     }
-    const subroutes = [];
-    for (const page of Cluar.pages()[language.code]) {
-      if (page.navigable == false || page.link.indexOf("//") >= 0) {
+    const pageSubroutes = [];
+    for (const pageJSON of Cluar.pages()[language.code]) {
+      if (pageJSON.navigable == false || pageJSON.link.indexOf("//") >= 0) {
         continue;
       }
 
-      let comPage = <Template page={page} />;
+      let comPage = <Template page={pageJSON} />;
+      const pageLink = pageJSON.link.startsWith("/") ? pageJSON.link : `/${pageJSON.link}`;
 
-      subroutes.push(
+      pageSubroutes.push(
         <Route
-          key={`/${language.locale}${page.link}`}
-          path={`/${language.locale}${page.link}`}
+          key={`/${language.locale}${pageLink}`}
+          path={`/${language.locale}${pageLink}`}
           exact
           element={comPage}
         />
       );
     }
-    routes.push(
+    pageRoutes.push(
       <Route key={`/${language.locale}/`} path={`/${language.locale}/`}>
-        {subroutes}
+        {pageSubroutes}
       </Route>
     );
-    console.log("Cluar.pages()", Cluar.pages());
   }
 
   const AppContent = () => {
     const location = useLocation();
     const isReservedArea = location.pathname.startsWith("/reserved-area");
+    const dispatch = useDispatch();
+    const loggedUserInfoReload = useSelector(
+      (state) => state.loggedUserInfoState?.loggedUserInfoReload
+    );
+
+    useEffect(() => {
+      _service({
+        method: "GET",
+        url: "reserved-area/profile",
+        success: (response) => {
+          if (response.json.result) {
+            dispatch(loggedUserInfoAction(response.json.data));
+          }
+        },
+        fail: (e) => {
+          console.error("Dados do Utilizador", e);
+        },
+      });
+    }, [loggedUserInfoReload]);
 
     return (
       <div className="page">
@@ -156,16 +175,16 @@ function App() {
               <Route path="/recovery" element={<Recovery />} />
               <Route path="/reserved-area" element={<ReservedArea />}>
                 <Route path="profile" element={<Profile />} />
-                <Route path="pages" element={<Pages />} />
-                <Route path="users" element={<Users />} />
-                <Route path="actions" element={<Actions />} />
-                <Route path="languages" element={<Languages />} />
+                <Route path="pages" element={<Page />} />
+                <Route path="users" element={<User />} />
+                <Route path="actions" element={<Action />} />
+                <Route path="languages" element={<Language />} />
                 <Route path="configuration" element={<Configuration />} />
-                <Route path="dictionary" element={<Dictionary />} />
+                <Route path="translation" element={<Translation />} />
                 <Route path="organization" element={<Organization />} />
               </Route>
-              {routes}
-              <Route element={<NotFound />} />
+              {pageRoutes}
+              <Route path='*' element={<NotFound />} />
             </Routes>
           </Content>
           <BaseCookies />

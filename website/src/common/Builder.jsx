@@ -16,25 +16,121 @@ import Content from "../components/Content";
 import Listing from "../components/Listing";
 import Functionality from "../components/Functionality";
 import Slider from "../components/Slider";
+import CluarRow from "../components/Row";
 import AdminBar from "../base/AdminBar";
 
 import { useNavigate } from "react-router";
 
 import _service from "@netuno/service-client";
 
-function Builder({ page }) {
+const EDIT_MODE_STORAGE_KEY = "builder-edit-mode";
+
+const loadPersistedEditMode = () => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return window.sessionStorage.getItem(EDIT_MODE_STORAGE_KEY) === "1";
+};
+
+function Builder({ page, canEdit }) {
   const [error, setError] = useState(false);
   const [structure, setStructure] = useState([]);
-  const [editMode, setEditMode] = useState(false);
-  const [showActionButtons, setShowActionButtons] = useState(false);
+  const [editMode, setEditMode] = useState(loadPersistedEditMode);
+  const [showActionButtons, setShowActionButtons] = useState(
+    loadPersistedEditMode,
+  );
   const [hasDiff, setHasDiff] = useState(false);
   const [canPublish, setCanPublish] = useState(false);
   const [pageVersionExists, setPageVersionExists] = useState(false);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const [currentPageVersion, setCurrentPageVersion] = useState(page?.page_version_uid);
+  const [currentPageVersion, setCurrentPageVersion] = useState(
+    page?.page_version_uid,
+  );
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!canEdit && (editMode || showActionButtons)) {
+      setEditMode(false);
+      setShowActionButtons(false);
+      window.sessionStorage.setItem(EDIT_MODE_STORAGE_KEY, "0");
+    }
+  }, [canEdit]);
+
+  useEffect(() => {
+    const handleLinkNavigation = (event) => {
+      if (!hasDiff || event.defaultPrevented) {
+        return;
+      }
+
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const link = event.target.closest("a[href]");
+      if (!link) {
+        return;
+      }
+
+      if (link.target === "_blank" || link.hasAttribute("download")) {
+        return;
+      }
+
+      const href = link.getAttribute("href");
+      if (!href || href.startsWith("#") || href.startsWith("javascript:")) {
+        return;
+      }
+
+      const nextUrl = new URL(link.href, window.location.href);
+      const currentUrl = new URL(window.location.href);
+      const willChangePage =
+        nextUrl.pathname !== currentUrl.pathname ||
+        nextUrl.search !== currentUrl.search;
+
+      if (!willChangePage) {
+        return;
+      }
+
+      const confirmLeave = window.confirm(
+        "Existem alterações não guardadas. Se sair agora, elas serão perdidas. Deseja continuar?",
+      );
+      if (!confirmLeave) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    document.addEventListener("click", handleLinkNavigation, true);
+
+    return () => {
+      document.removeEventListener("click", handleLinkNavigation, true);
+    };
+  }, [hasDiff]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (!hasDiff) {
+        return;
+      }
+
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [hasDiff]);
 
   useEffect(() => {
     if (hasDiff || canPublish) {
@@ -49,40 +145,62 @@ function Builder({ page }) {
   }, [hasDiff]);
 
   useEffect(() => {
-    console.log("pageVersionExists", pageVersionExists);
-    console.log("currentPageVersion", currentPageVersion);
-  }, [pageVersionExists]);
-
-  useEffect(() => {
-    // Verifica se o currentPageVersion é diferente da publicada
     if (currentPageVersion !== page?.page_version_uid && hasDiff == false) {
       setHasDiff(false);
       setCanPublish(true);
-      setEditMode(true);
     } else {
       setHasDiff(false);
       setCanPublish(false);
-      setEditMode(false);
     }
   }, [currentPageVersion]);
 
   useEffect(() => {
-    if (searchParams.get("version")) {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.sessionStorage.setItem(EDIT_MODE_STORAGE_KEY, editMode ? "1" : "0");
+  }, [editMode]);
+
+  useEffect(() => {
+    if (hasDiff || canPublish) {
+      setShowActionButtons(true);
+    } else {
+      setShowActionButtons(false);
+    }
+  }, [hasDiff, canPublish]);
+
+  useEffect(() => {
+    setPageVersionExists(!hasDiff);
+  }, [hasDiff]);
+
+  useEffect(() => {
+    if (currentPageVersion !== page?.page_version_uid && hasDiff == false) {
+      setHasDiff(false);
+      setCanPublish(true);
+    } else {
+      setHasDiff(false);
+      setCanPublish(false);
+    }
+  }, [currentPageVersion]);
+
+  useEffect(() => {
+    if (searchParams.get("versionUid")) {
       _service({
-        url: "/editor/page-version",
+        url: "/reserved-area/editor/page-version",
         method: "GET",
         data: {
-          version: searchParams.get("version"),
+          versionUid: searchParams.get("versionUid"),
         },
         success: (res) => {
           if (res.json.result) {
-            setStructure(res.json.structure);
-            setCurrentPageVersion(searchParams.get("version"));
+            setStructure(res.json.data);
+            setCurrentPageVersion(searchParams.get("versionUid"));
             setPageVersionExists(true);
           }
         },
         fail: (res) => {
-          console.log(res);
+          console.error(res);
         },
       });
     } else {
@@ -132,13 +250,35 @@ function Builder({ page }) {
 
   const handleChangeSection = (data, current) => {
     const index = structure.findIndex((item) => item.uid === current);
+    const newIndex = data.sorter;
 
     if (index !== -1) {
       let newStructure = [...structure];
-      newStructure[index] = data;
-      newStructure = newStructure
-        .sort((a, b) => a.sorter - b.sorter)
-        .map((item, index) => ({ ...item, sorter: (index + 1) * 10 }));
+
+      if (
+        Number.isInteger(newIndex) &&
+        newIndex >= 0 &&
+        newIndex < newStructure.length &&
+        newIndex !== index
+      ) {
+        if (index > newIndex) {
+          for (let i = index; i > newIndex; i--) {
+            newStructure[i] = newStructure[i - 1];
+            newStructure[i].sorter = i;
+            newStructure[i].status = "to_update";
+          }
+          newStructure[newIndex] = data;
+        } else if (newIndex > index) {
+          for (let i = index; i < newIndex; i++) {
+            newStructure[i] = newStructure[i + 1];
+            newStructure[i].sorter = i;
+            newStructure[i].status = "to_update";
+          }
+          newStructure[newIndex] = data;
+        }
+      } else {
+        newStructure[index] = data;
+      }
 
       setStructure([...newStructure]);
       setHasDiff(true);
@@ -149,27 +289,34 @@ function Builder({ page }) {
   const handleSavePage = () => {
     setSaving(true);
     _service({
-      url: "/editor/page-version/save",
+      url: "/reserved-area/editor/page-version/save",
       method: "POST",
       data: {
-        structures: structure.filter((item) => item.status !== "to_remove"),
+        structures: structure
+          .filter((item) => item.status !== "to_remove")
+          ?.map((item) => ({
+            ...item,
+            action_uids: !!item.action_uids
+              ? item.action_uids
+              : item.actions?.map((action) => action?.uid),
+          })),
         page: page.uid,
       },
       success: (res) => {
         if (res.json.result) {
-          const data = res.json['data'];
+          const data = res.json["data"];
           setCurrentPageVersion(data.page_version_uid);
 
           message.success("Página guardada com sucesso");
           setHasDiff(false);
         }
-        navigate(`?version=${res.json.data?.page_version_uid}`);
+        navigate(`?versionUid=${res.json.data?.page_version_uid}`);
         setHasDiff(false);
         setSaving(false);
       },
       fail: (error) => {
         message.error("Falha ao guardar página");
-        console.log(error);
+        console.error(error);
         setSaving(false);
       },
     });
@@ -179,11 +326,11 @@ function Builder({ page }) {
     setPublishing(true);
 
     _service({
-      url: "/editor/page-version/save/publish",
+      url: "/reserved-area/editor/page-version/save/publish",
       method: "POST",
       data: {
         page: page.uid,
-        page_version: currentPageVersion
+        page_version: currentPageVersion,
       },
       success: (res) => {
         if (res.json.result) {
@@ -195,34 +342,79 @@ function Builder({ page }) {
       },
       fail: (error) => {
         message.error("Falha ao publicar página");
-        console.log(error);
+        console.error(error);
         setPublishing(false);
       },
     });
   };
 
-  /*const handleSetEditMode = (mode) => {
-    setEditMode(mode);
-    console.log("mode", mode);
-    setShowActionButtons(mode);
+  const handleDuplicateSection = (data, current) => {
+    const index = structure.findIndex((item) => item.uid === current);
 
-    if (mode && (hasDiff || canPublish)) {
-      setShowActionButtons(true);
-    } else if (!mode) {
-      setShowActionButtons(false);
+    if (index === -1) {
+      return;
     }
-  };*/
+
+    const sectionToDuplicate = structure[index];
+    let uid = Date.now();
+    while (structure.some((item) => String(item.uid) === String(uid))) {
+      uid += 1;
+    }
+
+    const duplicatedSection = {
+      ...sectionToDuplicate,
+      ...data,
+      uid,
+      status: "to_create",
+      actions: sectionToDuplicate.actions?.map((action) => ({ ...action })),
+      items: sectionToDuplicate.items?.map((item) => ({
+        ...item,
+        ...(item.section ? { section: { ...item.section } } : {}),
+      })),
+    };
+
+    const newStructure = [...structure];
+    newStructure.splice(index + 1, 0, {
+      ...duplicatedSection,
+      sorter: sectionToDuplicate.sorter ? sectionToDuplicate.sorter + 1 : 10,
+    });
+
+    setStructure(
+      newStructure
+        .sort((a, b) => a.sorter - b.sorter)
+        .map((item, index) => ({ ...item, sorter: (index + 1) * 10 })),
+    );
+    setHasDiff(true);
+    setCanPublish(true);
+  };
+
+  /*const handleSetEditMode = (mode) => {
+  setEditMode(mode);
+  console.log("mode", mode);
+  setShowActionButtons(mode);
+
+  if (mode && (hasDiff || canPublish)) {
+    setShowActionButtons(true);
+  } else if (!mode) {
+    setShowActionButtons(false);
+  }
+};*/
 
   const extraBarAdmin = (
     <Row gutter={12}>
       <Col>
         <Button onClick={handleSavePage} loading={saving} disabled={!hasDiff}>
-          {Cluar.plainDictionary("extra-bar-admin-save")}
+          {Cluar.plainTranslation("extra-bar-admin-save")}
         </Button>
       </Col>
       <Col>
-        <Button type="primary" onClick={handlePublishPage} loading={publishing} disabled={!canPublish || hasDiff}>
-          {Cluar.plainDictionary("extra-bar-admin-publish")}
+        <Button
+          type="primary"
+          onClick={handlePublishPage}
+          loading={publishing}
+          disabled={!canPublish || hasDiff}
+        >
+          {Cluar.plainTranslation("extra-bar-admin-publish")}
         </Button>
       </Col>
     </Row>
@@ -256,23 +448,25 @@ function Builder({ page }) {
   const handleSetEditMode = (mode) => {
     setEditMode(mode);
     setShowActionButtons(mode);
-  }
+  };
 
   return (
     <main>
-      {_auth.isLogged() && (
+      {canEdit && (
         <AdminBar
           onChangeEditMode={handleSetEditMode}
-          extra={showActionButtons && extraBarAdmin}
+          extra={editMode && extraBarAdmin}
           pageData={page}
+          editMode={editMode}
           currentStructure={structure.filter(
-            (item) => item.status !== "to_remove"
+            (item) => item.status !== "to_remove",
           )}
         />
       )}
       <PageSection
         editMode={editMode}
         onNewSection={handleAddNewSection}
+        showDuplicateButton={false}
       ></PageSection>
       {structure
         .filter((item) => item.status !== "to_remove")
@@ -292,6 +486,17 @@ function Builder({ page }) {
             case "slider":
               SectionComponent = <Slider {...item} />;
               break;
+            case "row":
+              SectionComponent = (
+                <CluarRow
+                  {...item}
+                  editMode={editMode}
+                  onUpdateRow={(data) => {
+                    handleChangeSection(data, item.uid);
+                  }}
+                />
+              );
+              break;
             case "functionality":
               SectionComponent = <Functionality {...item} />;
               break;
@@ -310,18 +515,27 @@ function Builder({ page }) {
                 sortArrowsVisible={true}
                 disableSortUp={index === 0}
                 disableSortDown={index === structure.length - 1}
-                onSortDown={(data) =>
-                  handleChangeSection(
-                    { ...data, sorter: data.sorter + 11 },
-                    item.uid
-                  )
+                onDuplicateSection={(data) =>
+                  handleDuplicateSection(data, item.uid)
                 }
-                onSortUp={(data) =>
-                  handleChangeSection(
-                    { ...data, sorter: data.sorter - 11 },
-                    item.uid
-                  )
-                }
+                onSortDown={(data) => {
+                  const index = structure.findIndex((i) => i.uid === item.uid);
+                  if (index < structure.length - 1) {
+                    handleChangeSection(
+                      { ...data, sorter: index + 1 },
+                      item.uid,
+                    );
+                  }
+                }}
+                onSortUp={(data) => {
+                  const index = structure.findIndex((i) => i.uid === item.uid);
+                  if (index >= 0) {
+                    handleChangeSection(
+                      { ...data, sorter: index - 1 },
+                      item.uid,
+                    );
+                  }
+                }}
               >
                 {SectionComponent}
               </PageSection>
